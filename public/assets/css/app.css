@@ -1110,6 +1110,11 @@
   font-size: 3rem;
 }
 
+.stats-icon i.grey_i {
+  color: #505050;
+  font-size: 3rem;
+}
+
 .stats-icon i.orange_i {
   color: #ffbf76;
   font-size: 3rem;

@@ -142,7 +142,7 @@
         return {
             modalInstance: null,
             avance_contable: [],
-            anio: 2024,
+            anio: 0,
             chart: null,
             root: null,
             years: [],
@@ -156,6 +156,7 @@
         };
     },
     mounted() {
+        this.anio = new Date().getFullYear();
         this.initModal();
         this.avanceContable();
         this.generateYears();
@@ -261,7 +262,7 @@
                     empresa: element.nombre,
                     porcentaje_avance: element.porcentaje,
                     logo: {
-                        src: element.logo
+                        src: 'http://192.168.0.45:8000/'+element.logo
                     }
                 });
             });

@@ -24,6 +24,10 @@ export function cambiarEstadoPago(id_pago, estado) {
     return http().get('avance/cambiar-estado-pago?id_pago='+id_pago+'&estado='+estado);
 }
 
-export function datosDashboard() {
-    return http().get('compromiso-avance/datosDashboard');
+export function datosDashboard(anio) {
+    return http().get('compromiso-avance/datosDashboard?anio='+anio);
+}
+
+export function listarNotificaciones() {
+    return http().get('compromiso-avance/notificaciones');
 }

@@ -10,9 +10,13 @@
                 <section class="row">
                     <div class="col-lg-12">
                         <div class="row">
-                            <div class="col-6 col-lg-5 col-md-6">
+                            <div class="col-6 col-lg-2 col-md-6" style="display: flex;flex-direction: column;justify-content: center;">
+                                <h2 style="color: #050539ab; font-weight: bolder;">Dashboard</h2>
+                                <h2 style="color: #050539ab; font-weight: bolder; ">Año: {{ anio }}</h2>
+                            </div>
+                            <div class="col-6 col-lg-4 col-md-6">
                                 <router-link to="/obligaciones-impuestos">
-                                    <div class="card cadop">
+                                    <div class="card cadop" style="margin: 0">
                                         <div class="card-body px-3 py-4-5">
                                             <div class="row">
                                                 <div class="col-md-2">
@@ -29,9 +33,9 @@
                                     </div>
                                 </router-link>
                             </div>
-                            <div class="col-6 col-lg-5 col-md-6">
+                            <div class="col-6 col-lg-3 col-md-6">
                                 <router-link to="/avance-contable">
-                                    <div class="card cadop">
+                                    <div class="card cadop" style="margin: 0">
                                         <div class="card-body px-3 py-4-5">
                                             <div class="row">
                                                 <div class="col-md-2">
@@ -41,7 +45,7 @@
                                                 </div>
                                                 <div class="col-md-10" style="display: flex;flex-direction: column;justify-content: center;">
                                                     <h3 class="text-muted font-semibold">Avance Contable</h3>
-                                                    <h4 class="font-extrabold mb-0">112</h4>
+                                                    <h4 class="font-extrabold mb-0" v-if="datos!=null" >{{ datos.pagos.porcentaje_pagos_pendientes }}%</h4>
                                                 </div>
                                             </div>
                                         </div>
@@ -49,24 +53,37 @@
                                 </router-link>
                             </div>
                             <div class="col-6 col-lg-2 col-md-6">
-                                <router-link to="/obligaciones-impuestos">
-                                    <div class="card cadop">
-                                        <div class="card-body px-3 py-4-5">
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <div class="stats-icon green">
-                                                        <i class="bi bi-bell-fill orange_i"></i>
-                                                    </div>
+                                <div class="card cadop" style="margin: 0" @click="mostrarNotificaciones();">
+                                    <div class="card-body px-3 py-4-5">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="stats-icon green">
+                                                    <div class="div_notification" v-if="notificaciones != null">{{notificaciones.numero_notificaciones}}</div>
+                                                    <i class="bi bi-bell-fill orange_i"></i>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </router-link>
+                                </div>
+                            </div>
+                            <div class="col-6 col-lg-1 col-md-6">
+                                <div class="card cadop" @click="openModal()" style="margin: 0">
+                                    <div class="card-body px-3 py-4-5">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="stats-icon green">
+                                                    <i class="bi bi-gear-fill grey_i"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="row">
+                        <br>
+                        <div class="row" style="margin-top: 2.5vh">
                             <div class="col-lg-6">
-                                <div class="card" style="margin: 0px; height: 67vh;overflow-y: auto;">
+                                <div class="card" style="margin: 0px;">
                                     <div class="card-header">
                                         <br>
                                         <h2>Obligaciones vencidas</h2>
@@ -83,59 +100,101 @@
                                         <div class="table-responsive">
                                             <template v-if="datos != null">
                                                 <template v-if="tipo_obligacion_mostrada == 1">
-                                                    <table class="table table-hover table-lg">
-                                                        <thead>
-                                                            <tr>
-                                                                <th style="background-color: #b5f1fd">Empresa</th>
-                                                                <th style="background-color: #b5f1fd">Declaración</th>
-                                                                <th style="background-color: #b5f1fd">Fecha <br> presentación</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <tr v-for="(item, index) in datos.fecha_presentacion_vencida" :key="index">
-                                                                <td class="col-3">
-                                                                    <div class="align-items-center">
-                                                                        <p class="font-bold ms-3 mb-0">{{ item.nombre_empresa }}</p>
-                                                                    </div>
-                                                                </td>
-                                                                <td class="col-auto">
-                                                                    <p class=" mb-0">{{ item.compromiso_descripcion }}</p>
-                                                                </td>
-                                                                <td class="col-auto" style="background-color: #ffc8c8">
-                                                                    <p class=" mb-0" style="font-weight: bold;">{{ item.fecha_presentacion }}</p>
-                                                                </td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
+                                                    <div class="table-container" style="height: 44vh">
+                                                        <table class="table table-hover table-lg">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="width:40%; background-color: #b5f1fd">Empresa</th>
+                                                                    <th style="background-color: #b5f1fd">Declaración</th>
+                                                                    <th style="width:20%; text-align: center; background-color: #b5f1fd">Fecha <br> presentación</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr v-for="(item, index) in datos.fecha_presentacion_vencida" :key="index">
+                                                                    <td class="col-3">
+                                                                        <div class="align-items-center">
+                                                                            <p class="font-bold ms-3 mb-0">{{ item.nombre_empresa }}</p>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td class="col-auto">
+                                                                        <p class=" mb-0">{{ item.compromiso_descripcion }}</p>
+                                                                    </td>
+                                                                    <td class="col-auto" style="background-color: #ffc8c8">
+                                                                        <p class=" mb-0" style="font-weight: bold;">{{ item.fecha_presentacion }}</p>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
                                                 </template>
                                                 <template v-else>
-                                                    <table class="table table-hover table-lg">
-                                                        <thead>
-                                                            <tr>
-                                                                <th style="background-color: #b5f1fd">Empresa</th>
-                                                                <th style="background-color: #b5f1fd">Declaración</th>
-                                                                <th style="background-color: #b5f1fd">Fecha <br> vencimiento</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <tr v-for="(item, index) in datos.fecha_vencimiento_vencida" :key="index">
-                                                                <td class="col-3">
-                                                                    <div class="align-items-center">
-                                                                        <p class="font-bold ms-3 mb-0">{{ item.nombre_empresa }}</p>
-                                                                    </div>
-                                                                </td>
-                                                                <td class="col-auto">
-                                                                    <p class=" mb-0">{{ item.compromiso_descripcion }}</p>
-                                                                </td>
-                                                                <td class="col-auto" style="background-color: #ffc8c8">
-                                                                    <p class=" mb-0" style="font-weight: bold;">{{ item.fecha_vencimiento }}</p>
-                                                                </td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
+                                                    <div class="table-container" style="height: 44vh">
+                                                        <table class="table table-hover table-lg">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="width:40%; background-color: #b5f1fd">Empresa</th>
+                                                                    <th style="background-color: #b5f1fd">Declaración</th>
+                                                                    <th style="width:20%; text-align: center; background-color: #b5f1fd">Fecha <br> vencimiento</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr v-for="(item, index) in datos.fecha_vencimiento_vencida" :key="index">
+                                                                    <td class="col-3">
+                                                                        <div class="align-items-center">
+                                                                            <p class="font-bold ms-3 mb-0">{{ item.nombre_empresa }}</p>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td class="col-auto">
+                                                                        <p class=" mb-0">{{ item.compromiso_descripcion }}</p>
+                                                                    </td>
+                                                                    <td class="col-auto" style="background-color: #ffc8c8">
+                                                                        <p class=" mb-0" style="font-weight: bold;">{{ item.fecha_vencimiento }}</p>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
                                                 </template>
                                             </template>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="card" style="margin: 0px;">
+                                    <div class="card-header">
+                                        <br>
+                                        <h2>Pagos vencidos</h2>
+                                    </div>
+                                    <div class="card-body">
+                                        <template v-if="datos != null">
+                                            <div class="table-container">
+                                                <table class="table table-hover table-lg">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width:40%; background-color: #96f7aa">Empresa</th>
+                                                            <th style="background-color: #96f7aa">Concepto</th>
+                                                            <th style="width:20%; background-color: #96f7aa">Fecha de pago</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody style="height: 67vh;overflow-y: auto;">
+                                                        <tr v-for="(item, index) in datos.pagos.lista_pagos_pendientes" :key="index">
+                                                            <td class="col-3">
+                                                                <div class="align-items-center">
+                                                                    <p class="font-bold ms-3 mb-0">{{ item.nombre }}</p>
+                                                                </div>
+                                                            </td>
+                                                            <td class="col-auto">
+                                                                <p class=" mb-0">{{ item.nombre_concepto }}</p>
+                                                            </td>
+                                                            <td class="col-auto" style="background-color: #ffc8c8">
+                                                                <p class=" mb-0" style="font-weight: bold;">{{ item.fecha_pago }}</p>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </template>
                                     </div>
                                 </div>
                             </div>
@@ -144,27 +203,290 @@
                 </section>
             </div>
         </div>
+        <div class="modal fade" id="configModal" tabindex="-1" role="dialog" aria-labelledby="infoModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h3  id="infoModalLabel">Configuraciones</h3>
+                    </div>
+                    <div class="modal-body">
+                        <div style="padding: 0px; display: flex; width: 100%; align-items: center;">
+                            <h4 style="padding-right: 30px;">Seleccione un periodo</h4>
+                            <select class="form-control select-mio" name="anio" v-model="anio" id="">
+                                <option v-for="year in years" :key="year" :value="year">
+                                    {{ year }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-success" @click="cambiarAnio()">Aplicar</button>
+                        <button type="button" class="btn btn-danger" @click="closeModal()">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="div_notificaciones_contenedor" style="cursor: pointer; right:-30%;" id="div_notificaciones_contenedor">
+            <i @click="mostrarNotificaciones()" style="position: absolute;  top: 18px;  right: 20px; font-weight: bolder;  color: red; font-size: 30px;" class="bi bi-x-lg"></i>
+            <br>
+            <br>
+            <table style="width: 100%">
+                <thead>
+                    <tr>
+                        <td @click="cambiarTipoNot(1)" :style="tipo_notificacion == 1 ? 'width: 50%; text-align: center; background-color: aquamarine;': 'width: 50%; text-align: center; background-color: white;'">
+                            Obligaciones e impuestos
+                        </td>
+                        <td @click="cambiarTipoNot(2)" :style="tipo_notificacion == 2 ? 'width: 50%; text-align: center; background-color: aquamarine;': 'width: 50%; text-align: center; background-color: white;'">
+                            Avance contable
+                        </td>
+                    </tr>
+                </thead>
+            </table>
+            <br>
+            <div style="width: 100%; height: 80vh; overflow-y: auto" v-if="tipo_notificacion == 1 && notificaciones != null">
+                <div :class="'notificacion '+item.clase" v-for="(item, index) in notificaciones.compromisos_vencidos" :key="index">
+                    <div @click="openModalCambiarEstadoObligaciones(item)">
+                        <label><strong>Obligación: </strong> {{item.compromiso_descripcion}}</label><br>
+                        <label><strong>Empresa: </strong> {{item.nombre_empresa}}</label><br>
+                        <label v-if="item.tipo_ven == 'pres'" ><strong>Fecha  de Presentación: </strong> {{item.fecha_presentacion}}<br></label>
+                        <label v-if="item.tipo_ven == 'ven'" ><strong>Fecha  de Vencimiento: </strong> {{item.fecha_vencimiento}}<br></label>
+                        <label>{{item.desc_not}}</label><br>
+                    </div>
+                </div>
+            </div>
+            <div style="width: 100%; height: 80vh; overflow-y: auto" v-if="tipo_notificacion == 2 && notificaciones != null">
+                <div :class="'notificacion '+item.clase" v-for="(item, index) in notificaciones.pagos_vencidos" :key="index">
+                    <div @click="openModalCambiarEstadopago(item)">
+                        <label><strong>Concepto: </strong> {{item.nombre_concepto}}</label><br>
+                        <label><strong>Empresa: </strong> {{item.nombre}}</label><br>
+                        <label><strong>Fecha  de Pago: </strong> {{item.fecha_pago}}</label><br>
+                        <label>{{item.desc_not}}</label><br>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="cambiarEstadoObligaciones" tabindex="-1" role="dialog" aria-labelledby="infoModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h3  id="infoModalLabel">Cambiar estado de compromiso</h3>
+                    </div>
+                    <div class="modal-body" v-if="compromiso_editar != null">
+                        <h5><strong>Compromiso: </strong> {{ compromiso_editar.compromiso_descripcion }}</h5>
+                        <h5><strong>Empresa: </strong> {{ compromiso_editar.nombre_empresa }}</h5>
+                        <div v-if="compromiso_editar.tipo_ven == 'pres'">
+                            <h5><strong>Fecha de Presentación: </strong> {{ compromiso_editar.fecha_presentacion }} </h5>
+                            <hr>
+                            <label style="font-weight: bold;" for="">Seleccione un estado</label>
+                            <select class="form-control" v-model="compromiso_editar.estado_pres" required>
+                                <option value="pendiente" selected>Pendiente</option>
+                                <option value="presentado">Presentado</option>
+                                <option value="pagado">Pagado</option>
+                                <option value="vencido">Vencido</option>
+                            </select>
+                        </div>
+                        <div v-else>
+                            <h5><strong>Fecha de Vencimiento: </strong> {{ compromiso_editar.fecha_vencimiento }} </h5>
+                            <hr>
+                            <label style="font-weight: bold;" for="">Seleccione un estado</label>
+                            <select class="form-control" v-model="compromiso_editar.estado_venc" required>
+                                <option value="pendiente" selected>Pendiente</option>
+                                <option value="presentado">Presentado</option>
+                                <option value="pagado">Pagado</option>
+                                <option value="vencido">Vencido</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-success" @click="cambiarEstadoCompromiso()">Guardar</button>
+                        <button type="button" class="btn btn-danger" @click="closeModalCambiarEstadoCompromiso()">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+            
+
     </div>
 </template>
 <script>
 import * as oblicacionesService from "../services/obligaciones";
-//import { Modal } from 'bootstrap';
-//import Swal from "sweetalert2";
+import { Modal } from 'bootstrap';
+import Swal from "sweetalert2";
 
 export default {
     data() {
         return {
             datos: null,
-            tipo_obligacion_mostrada: 1
+            tipo_obligacion_mostrada: 1,
+            modalInstance: null,
+            years: [],
+            anio: 0,
+            notificaciones: null,
+            tipo_notificacion: 1,
+            compromiso_editar: null,
+            modalCambiarEstadoObligaciones: null,
+            mesesUno: [
+                "enero", "febrero", "marzo", "abril", "mayo", "junio",
+                "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+            ],
+            pago_editar: null,
         }
     },
     mounted() {
+        this.anio = new Date().getFullYear();
         this.datosDashboard();
+        this.generateYears();
+        this.initModal();
+        this.listarNotificaciones();
     },
     methods: {
+        generateYears() {
+            const currentYear = new Date().getFullYear();
+            for (let year = 2024; year <= currentYear; year++) {
+                this.years.push(year);
+            }
+        },
+        cambiarAnio(){
+            this.closeModal();
+            setTimeout(() => {
+                this.datosDashboard();
+            }, 500);
+        },
+        initModal() {
+            const modalElement = document.getElementById('configModal');
+            this.modalInstance = new Modal(modalElement);
+
+            const cambiarEstadoObligaciones = document.getElementById('cambiarEstadoObligaciones');
+            this.modalCambiarEstadoObligaciones = new Modal(cambiarEstadoObligaciones);
+        },
+        openModal() {
+            this.modalInstance.show(); 
+        },
+        openModalCambiarEstadoObligaciones(item) {
+            this.compromiso_editar = item;
+            this.modalCambiarEstadoObligaciones.show(); 
+        },
+        closeModalCambiarEstadoCompromiso(){
+            this.modalCambiarEstadoObligaciones.hide(); 
+        },
+        closeModal() {
+            this.modalInstance.hide();
+        },
         async datosDashboard(){
-            this.datos = await oblicacionesService.datosDashboard();
+            this.datos = await oblicacionesService.datosDashboard(this.anio);
             this.datos = this.datos.data;
+        },
+        async listarNotificaciones() {
+            this.notificaciones = await oblicacionesService.listarNotificaciones();
+            this.notificaciones = this.notificaciones.data;
+        },
+        cambiarTipoNot(valor){
+            this.tipo_notificacion = valor;
+        },
+        mostrarNotificaciones(){
+            var contenedor = document.getElementById("div_notificaciones_contenedor");
+            console.log(contenedor)
+            if (contenedor.style.right === "-30%") {
+                contenedor.style.right = "0px";
+            } else if (contenedor.style.right === "0px") {
+                contenedor.style.right = "-30%";
+            }
+        },
+        async cambiarEstadoCompromiso(){
+            var datos = {
+                tipo: this.compromiso_editar.tipo_ven,
+                data: this.compromiso_editar
+            };
+            
+            await oblicacionesService.cambiarEstadoCompromiso(datos).then(respuesta => {
+                var respuesta_ok = respuesta.data;
+                if(respuesta_ok.success == 1){
+                    Swal.fire({
+                        position: "center",
+                        icon: "success",
+                        title: respuesta_ok.message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+
+                    setTimeout(() => {
+                        this.datosDashboard();
+                        this.closeModalCambiarEstadoCompromiso();
+                        this.listarNotificaciones();
+                    }, 1500);
+                
+                }else{
+                    Swal.fire({
+                        position: "center",
+                        icon: "error",
+                        title: respuesta_ok.message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                }
+            });
+        },
+        openModalCambiarEstadopago(item) {
+            this.pago_editar = item;
+            console.log(this.pago_editar);
+            const selectHTML = `
+                <h4 style="text-align: left; font-weight: bold;">`+this.pago_editar.nombre+`</h4>
+                <h4 style="text-align: left; font-weight: bold;"><span style="color: blue">Concepto: </span>`+this.pago_editar.nombre_concepto+`</h4>
+                <h4 style="text-transform: capitalize; text-align: left; font-weight: bold;"><span style="color: blue">Mes: </span>`+this.mesesUno[this.pago_editar.mes_pago]+`</h4>
+                <br>
+                <select style="font-weight: bold;" id="estado_concepto" name="frecuencia" class="form-control" aria-invalid="false">
+                    <option value="">Seleccione una opción</option>
+                    <option value="N/A">N/A</option>
+                    <option value="pagado">PAG</option>
+                    <option value="pendiente">PEN</option>
+                </select>
+            `;
+
+            Swal.fire({
+                title: 'Cambiar estado de concepto',
+                html: selectHTML,
+                confirmButtonText: 'Aceptar',
+                showCancelButton: true,
+                cancelButtonText: "Cerrar",
+                cancelButtonColor: "red",
+                confirmButtonColor: 'green',
+                focusConfirm: false,
+                preConfirm: () => {
+                    const estado_concepto = document.getElementById('estado_concepto').value;
+                    if (estado_concepto) {
+                        this.cambiarEstadoPago(this.pago_editar.id, estado_concepto);
+                    } else {
+                        Swal.showValidationMessage('Debe seleccionar una opción');
+                    }
+                }
+            });
+        },
+        async cambiarEstadoPago(id_pago, estado_concepto){
+            this.loading = true;
+            var respuesta = await oblicacionesService.cambiarEstadoPago(id_pago, estado_concepto);
+
+            if(respuesta.data.success == 1){
+                Swal.fire({
+                    position: "center",
+                    icon: "success",
+                    title: respuesta.data.message,
+                    showConfirmButton: false,
+                    timer: 1900
+                });
+                setTimeout(() => {
+                    this.datosDashboard();
+                    this.listarNotificaciones();
+                }, 2000);
+            }else{
+                Swal.fire({
+                    position: "center",
+                    icon: "error",
+                    title: respuesta.data.message,
+                    showConfirmButton: false,
+                    timer: 1900
+                });
+            }  
         },
     },
 }
@@ -193,5 +515,95 @@ export default {
     td, th {
         text-align: center;
         padding: 10px !important;
+    }
+
+    .select-mio {
+        padding: 5px !important;
+        height: 43px !important;
+        text-align: center !important;
+        width: 185px !important;
+        font-size: 23px !important;
+        background-color: aliceblue !important;
+        cursor: pointer !important;
+        font-weight: bold !important;
+    }
+
+    .table-container {
+        height: 52vh;
+        width: 100%;
+        overflow-y: auto; /* Scroll vertical */
+        border: 1px solid #ccc; /* Bordes para visualización */
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 8px;
+        text-align: left;
+        border: 1px solid #ccc;
+    }
+    thead th {
+        position: sticky;
+        top: 0; /* Mantener la cabecera fija */
+        background-color: #f8f8f8;
+        z-index: 1;
+    }
+
+    .div_notification {
+        position: absolute;
+        right: 35%;
+        top: 18%;
+        font-size: 16px;
+        background-color: #ff0000;
+        padding: 5px;
+        width: 34px;
+        height: 34px;
+        text-align: center;
+        color: wheat;
+        font-weight: bolder;
+        border-radius: 50%;
+    }
+
+
+    .div_notificaciones_contenedor{
+        width: 30%;
+        height: 100vh;
+        position: absolute;
+        top: 0px;
+        background-color: #ffff;
+        z-index: 93939393939;
+        box-shadow: 0px 0px 14px 4px rgba(121, 121, 121, 0.2);
+        transition: all .3s ease-in-out;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow-y: auto;
+    }
+
+    .notificacion {
+        background-color: #ccc;
+        padding: 10px;
+        border-radius: 20px;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .noti_obligaciones {
+       background-color: #c2dbff;
+       color: #183663;
+       transition: all .2s ease-in;
+    }
+
+    .noti_avance {
+       background-color: #dec2ff;
+       color: #4b1863;
+       transition: all .2s ease-in;
+    }
+
+    .noti_obligaciones:hover, .noti_avance:hover {
+        transform: scale(0.95);
+        cursor: pointer;
     }
 </style>
