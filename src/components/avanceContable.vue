@@ -21,7 +21,7 @@
             </div>
             <hr>
             <div class="card">
-                <div class="hello" ref="chartdiv" style="padding: 3vh; overflow: hidden;"></div>
+                <div class="hello" ref="chartdiv" style="padding: 3vh;"></div>
                 <!-- Modal -->
                 <div class="modal fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="infoModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
@@ -262,27 +262,32 @@
                     empresa: element.nombre,
                     porcentaje_avance: element.porcentaje,
                     logo: {
-                        src: 'http://192.168.0.45:8000/'+element.logo
+                        src: 'https://csi-ingenieria.com/Contabilidad/public/images/empresas/'+element.logo
                     }
                 });
             });
 
             let chart = root.container.children.push(
                 am5xy.XYChart.new(root, {
-                    panX: false,
                     panY: false,
-                    wheelX: "none",
                     wheelY: "none",
                     paddingBottom: 50,
                     paddingTop: 40,
                     paddingLeft:0,
-                    paddingRight:0
+                    paddingRight:0,
+                    panX: false,
+                    wheelX: "panX",    
+                    pinchZoomX: false
                 })
             );
 
+            chart.set("scrollbarX", am5.Scrollbar.new(root, {
+                orientation: "horizontal" // Orientación horizontal
+            }));
+
             let xRenderer = am5xy.AxisRendererX.new(root, {
                 minorGridEnabled:true,
-                minGridDistance:60
+                minGridDistance:20
             });
 
             xRenderer.grid.template.set("visible", false);
@@ -294,6 +299,20 @@
                     renderer: xRenderer
                 })
             );
+
+            
+
+            xAxis.get("renderer").labels.template.setAll({
+                maxWidth: 130,        
+                oversizedBehavior: "wrap", 
+                fontSize: 10,         
+                rotation: -75,          
+                centerY: am5.p50,     
+                paddingTop: 5,     
+                paddingBottom: 5, 
+                textAlign: "center",
+                fontWeight: 'bold'
+            });
 
             let yRenderer = am5xy.AxisRendererY.new(root, {});
             yRenderer.grid.template.set("strokeDasharray", [3]);
@@ -329,7 +348,7 @@
                 strokeOpacity: 0,
                 cornerRadiusTR: 10,
                 cornerRadiusTL: 10,
-                maxWidth: 50,
+                maxWidth: 35,
                 fillOpacity: 0.8
             });
 
@@ -344,7 +363,7 @@
                     am5.Circle.new(
                     root,
                     {
-                        radius: 30
+                        radius: 27
                     },
                     circleTemplate
                     )
@@ -356,7 +375,7 @@
 
                 let imageContainer = bulletContainer.children.push(
                     am5.Container.new(root, {
-                    mask: maskCircle
+                        mask: maskCircle,
                     })
                 );
 
@@ -365,8 +384,8 @@
                         templateField: "logo",
                         centerX: am5.p50,
                         centerY: am5.p50,
-                        width: 40,
-                        height: 40
+                        width: 35,
+                        height: 35,
                     })
                 );
 
@@ -457,7 +476,7 @@
                         empresa: element.nombre,
                         porcentaje_avance: element.porcentaje,
                         logo: {
-                        src: element.logo
+                            src: 'https://csi-ingenieria.com/Contabilidad/public/images/empresas/'+element.logo
                         }
                     });
                 });

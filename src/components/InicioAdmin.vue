@@ -1,5 +1,14 @@
 <template lang="">
     <div>
+        <loading :active="loading" 
+            :can-cancel="true"
+            loader="bars" 
+            color="#38b4c5"
+            :height=100
+            :width=200
+            :on-cancel="onCancel"
+            :is-full-page="true">
+        </loading>
         <div id="main" style="background-color: #f2f7ff; margin-left: 0px !important; height:">
             <header class="mb-3">
                 <a href="#" class="burger-btn d-block d-xl-none">
@@ -86,21 +95,21 @@
                                 <div class="card" style="margin: 0px;">
                                     <div class="card-header">
                                         <br>
-                                        <h2>Obligaciones vencidas</h2>
+                                        <h2>Obligaciones DIAN</h2>
                                     </div>
                                     <div class="card-body">
                                         <div style="display: flex;  align-items: center">
                                             <label style="width: 100px; font-weight: bold">Filtrar: </label>
                                             <select style="width: 300px;" v-model="tipo_obligacion_mostrada" class="form-control">
-                                                <option value="1">Fecha de presentación vencida</option>
-                                                <option value="2">Fecha de vencimiento vencida</option>
+                                                <option value="1">Fecha de presentación</option>
+                                                <option value="2">Fecha de pago</option>
                                             </select>
                                         </div>
                                         <br>
                                         <div class="table-responsive">
                                             <template v-if="datos != null">
                                                 <template v-if="tipo_obligacion_mostrada == 1">
-                                                    <div class="table-container" style="height: 44vh">
+                                                    <div class="table-container" style="height: 58.9vh;">
                                                         <table class="table table-hover table-lg">
                                                             <thead>
                                                                 <tr>
@@ -162,37 +171,24 @@
                             </div>
                             <div class="col-lg-6">
                                 <div class="card" style="margin: 0px;">
-                                    <div class="card-header">
-                                        <br>
-                                        <h2>Pagos vencidos</h2>
+                                    <div class="card-header" style="display: flex; justify-content: space-between; padding: 31px  28px 9px 37px">
+                                        <h2>Notas rápidas</h2>
+                                        <button @click="openModalNotas()" class="btn btn-success"><h4 style="padding: 0px; margin: 0px">Nueva nota <i style="font-size: 15px" class="bi bi-plus-circle"></i></h4></button>
                                     </div>
                                     <div class="card-body">
-                                        <template v-if="datos != null">
-                                            <div class="table-container">
-                                                <table class="table table-hover table-lg">
-                                                    <thead>
-                                                        <tr>
-                                                            <th style="width:40%; background-color: #96f7aa">Empresa</th>
-                                                            <th style="background-color: #96f7aa">Concepto</th>
-                                                            <th style="width:20%; background-color: #96f7aa">Fecha de pago</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody style="height: 67vh;overflow-y: auto;">
-                                                        <tr v-for="(item, index) in datos.pagos.lista_pagos_pendientes" :key="index">
-                                                            <td class="col-3">
-                                                                <div class="align-items-center">
-                                                                    <p class="font-bold ms-3 mb-0">{{ item.nombre }}</p>
-                                                                </div>
-                                                            </td>
-                                                            <td class="col-auto">
-                                                                <p class=" mb-0">{{ item.nombre_concepto }}</p>
-                                                            </td>
-                                                            <td class="col-auto" style="background-color: #ffc8c8">
-                                                                <p class=" mb-0" style="font-weight: bold;">{{ item.fecha_pago }}</p>
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
+                                        <template v-if="notas != null">
+                                            <div class="table-container tablero" style="background-image: url('/tablero.png');">
+                                                <div style="padding: 31px; height: 100%;  width: 100.5%; padding-right: 10px;overflow-y: scroll; overflow-x: clip">
+                                                    <div class="row">
+                                                        <div class="col-lg-3" style="padding: 10px; margin-top: 35px;" v-for="(item, index) in notas" :key="index">
+                                                            <div @click="openModalEditarNotas(item)" class="nota" :style="'padding: 10px; background-color: '+item.color+';'+'color: '+item.color_texto+'; '">
+                                                                <p><span>{{ item.descripcion }}</span></p>
+                                                                <p v-if="item.fecha != null" style="margin-bottom: 0px"><i class="bi bi-calendar-range"></i> <span>{{ item.fecha }}</span></p>
+                                                                <img src="/clip.png" class="clip" alt="imagen">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </template>
                                     </div>
@@ -287,7 +283,7 @@
                             </select>
                         </div>
                         <div v-else>
-                            <h5><strong>Fecha de Vencimiento: </strong> {{ compromiso_editar.fecha_vencimiento }} </h5>
+                            <h5><strong>Fecha de pago: </strong> {{ compromiso_editar.fecha_vencimiento }} </h5>
                             <hr>
                             <label style="font-weight: bold;" for="">Seleccione un estado</label>
                             <select class="form-control" v-model="compromiso_editar.estado_venc" required>
@@ -305,16 +301,106 @@
                 </div>
             </div>
         </div>
-            
 
+        <div class="modal fade" id="modalNotas" tabindex="-1" role="dialog" aria-labelledby="infoModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h3  id="infoModalLabel">Nueva Nota</h3>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="descripcion" class="form-label">Descripción</label>
+                            <textarea v-model="datos_nota.descripcion" class="form-control" id="descripcion" name="descripcion" rows="4" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fecha" class="form-label">Fecha</label>
+                            <input  v-model="datos_nota.fecha" type="date" class="form-control" id="fecha" name="fecha" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="color" class="form-label">Color fondo</label>
+                                    <input v-model="datos_nota.color" type="color" class="form-control" id="color" name="color" required>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="color" class="form-label">Color texto</label>
+                                    <input v-model="datos_nota.color_texto" type="color" class="form-control" id="color" name="color" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-success" @click="guardarNota()">Guardar</button>
+                        <button type="button" class="btn btn-danger" @click="closeModalNotas()">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal fade" id="modaleditarNotas" tabindex="-1" role="dialog" aria-labelledby="infoModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h3  id="infoModalLabel">Editar Nota</h3>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="descripcion" class="form-label">Descripción</label>
+                            <textarea v-model="datos_nota_editar.descripcion" class="form-control" id="descripcion" name="descripcion" rows="4" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fecha" class="form-label">Fecha</label>
+                            <input  v-model="datos_nota_editar.fecha" type="date" class="form-control" id="fecha" name="fecha" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fecha" class="form-label">Mostrar / Quitar</label>
+                            <select v-model="datos_nota_editar.estado" class="form-control">
+                                <option value="1">Mostrar</option>
+                                <option value="0">Quitar</option>
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="color" class="form-label">Color fondo</label>
+                                    <input v-model="datos_nota_editar.color" type="color" class="form-control" id="color" name="color" required>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="color" class="form-label">Color texto</label>
+                                    <input v-model="datos_nota_editar.color_texto" type="color" class="form-control" id="color" name="color" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-success" @click="editarNota()">Guardar</button>
+                        <button type="button" class="btn btn-danger" @click="closeModalEditarNotas()">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 <script>
 import * as oblicacionesService from "../services/obligaciones";
+import * as notasService from "../services/notas";
 import { Modal } from 'bootstrap';
 import Swal from "sweetalert2";
+import Loading from 'vue3-loading-overlay';
+
 
 export default {
+    components: {
+        Loading
+    },
     data() {
         return {
             datos: null,
@@ -331,14 +417,33 @@ export default {
                 "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
             ],
             pago_editar: null,
+            loading: false,
+            modalNotas: null,
+            datos_nota: {
+                descripcion: '',
+                color: '#b5f1fd',
+                color_texto: '#000000',
+                fecha: ''
+            },
+            datos_nota_editar: {
+                descripcion: '',
+                color: '',
+                color_texto: '',
+                fecha: '',
+                estado: '0'
+            },
+            notas: [],
+            modalEditarNotas: null
         }
     },
     mounted() {
+        this.loading = true;
         this.anio = new Date().getFullYear();
         this.datosDashboard();
         this.generateYears();
         this.initModal();
         this.listarNotificaciones();
+        this.listarNotas();
     },
     methods: {
         generateYears() {
@@ -359,6 +464,12 @@ export default {
 
             const cambiarEstadoObligaciones = document.getElementById('cambiarEstadoObligaciones');
             this.modalCambiarEstadoObligaciones = new Modal(cambiarEstadoObligaciones);
+
+            const modalNotasI = document.getElementById('modalNotas');
+            this.modalNotas = new Modal(modalNotasI);
+
+            const modalEditarNotasI = document.getElementById('modaleditarNotas');
+            this.modalEditarNotas = new Modal(modalEditarNotasI);
         },
         openModal() {
             this.modalInstance.show(); 
@@ -367,11 +478,98 @@ export default {
             this.compromiso_editar = item;
             this.modalCambiarEstadoObligaciones.show(); 
         },
+        openModalNotas() {
+            this.modalNotas.show(); 
+        },
+        openModalEditarNotas(item) {
+            console.log(item);
+            this.datos_nota_editar = item;
+            this.modalEditarNotas.show(); 
+        },
         closeModalCambiarEstadoCompromiso(){
             this.modalCambiarEstadoObligaciones.hide(); 
         },
         closeModal() {
             this.modalInstance.hide();
+        },
+        closeModalNotas(){
+            this.modalNotas.hide(); 
+        },
+        closeModalEditarNotas(){
+            this.modalEditarNotas.hide(); 
+        },
+        async guardarNota(){
+            await notasService.guardarNota(this.datos_nota).then(respuesta => {
+                var respuesta_ok = respuesta.data;
+                if(respuesta_ok.success == 1){
+                    Swal.fire({
+                        position: "center",
+                        icon: "success",
+                        title: respuesta_ok.message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+
+                    setTimeout(() => {
+                        this.datos_nota = {
+                            descripcion: '',
+                            color: '#b5f1fd',
+                            color_texto: '#000000',
+                            fecha: ''
+                        };
+                        this.closeModalNotas();
+                        this.listarNotas();
+                    }, 1500);
+                
+                }else{
+                    Swal.fire({
+                        position: "center",
+                        icon: "error",
+                        title: respuesta_ok.message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                }
+            });
+        },
+        async editarNota(){
+            await notasService.editarNota(this.datos_nota_editar).then(respuesta => {
+                var respuesta_ok = respuesta.data;
+                if(respuesta_ok.success == 1){
+                    Swal.fire({
+                        position: "center",
+                        icon: "success",
+                        title: respuesta_ok.message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+
+                    setTimeout(() => {
+                        this.datos_nota_editar = {
+                            descripcion: '',
+                            color: '#b5f1fd',
+                            color_texto: '#000000',
+                            fecha: '',
+                            estado: '0'
+                        };
+                        this.closeModalEditarNotas();
+                        this.listarNotas();
+                    }, 1500);
+                
+                }else{
+                    Swal.fire({
+                        position: "center",
+                        icon: "error",
+                        title: respuesta_ok.message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                }
+            });
+        },
+        async listarNotas(){
+            this.notas = await notasService.listarNotas();
+            this.notas = this.notas.data;
         },
         async datosDashboard(){
             this.datos = await oblicacionesService.datosDashboard(this.anio);
@@ -380,6 +578,7 @@ export default {
         async listarNotificaciones() {
             this.notificaciones = await oblicacionesService.listarNotificaciones();
             this.notificaciones = this.notificaciones.data;
+            this.loading = false;
         },
         cambiarTipoNot(valor){
             this.tipo_notificacion = valor;
@@ -557,7 +756,6 @@ export default {
         font-size: 16px;
         background-color: #ff0000;
         padding: 5px;
-        width: 34px;
         height: 34px;
         text-align: center;
         color: wheat;
@@ -605,5 +803,44 @@ export default {
     .noti_obligaciones:hover, .noti_avance:hover {
         transform: scale(0.95);
         cursor: pointer;
+    }
+
+    .tablero  {
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+        background-position: center center;
+        height: 65vh;
+        overflow: hidden;
+    }
+
+    .nota {
+        position: relative; 
+        padding: 10px;
+        border-radius: 8px;
+        transition: all .3s ease-in-out;
+    }
+
+    .nota::after {
+        content: '';
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-left: 20px solid transparent;
+        border-right: 20px solid transparent;
+        border-bottom: 17px solid #fff;
+    }
+
+    .clip {
+        position: absolute;
+        width: 40px;
+        top: -39px;
+        left: 42%;
+        z-index: 999;
+    }
+
+    .nota:hover {
+        transform: scale(1.2) rotate(10deg);
+        z-index: 99999999999999;
     }
 </style>

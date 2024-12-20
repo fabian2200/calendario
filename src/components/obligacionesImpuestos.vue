@@ -34,7 +34,7 @@
                   </select>
                 </div>
                 <div v-else>
-                  <h5><strong>Fecha de Vencimiento: </strong> {{ compromiso_editar.fecha_vencimiento }} </h5>
+                  <h5><strong>Fecha de pago: </strong> {{ compromiso_editar.fecha_vencimiento }} </h5>
                   <hr>
                   <label style="font-weight: bold;" for="">Seleccione un estado</label>
                   <select class="form-control" v-model="compromiso_editar.estado_venc" required>
@@ -84,7 +84,7 @@ export default {
           showTrailingAndLeadingDates: false,
         },
         locale: 'es-ES',
-        defaultMode: 'week',
+        defaultMode: 'month',
         isSilent: true,
         showCurrentTime: false,
       },
@@ -186,7 +186,7 @@ export default {
         }
 
         var newEventF = {
-          title: "Fecha Vencimiento " + element.desc_compromiso,
+          title: "Fecha Pago " + element.desc_compromiso,
           time: { start: element.fecha_vencimiento, end: element.fecha_vencimiento },
           color: color2,
           isEditable: true,
